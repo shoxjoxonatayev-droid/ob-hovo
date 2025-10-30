@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ob-havo Ilovasi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .search-box {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .search-box input {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 30px;
+            background: #f1f1f1;
+            font-size: 16px;
+            outline: none;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-box button {
+            margin-left: 15px;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 50%;
+            background: #3498db;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-box button:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+        
+        .weather-info {
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .city-name {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .date {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        
+        .temperature {
+            font-size: 72px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 20px 0;
+        }
+        
+        .weather-icon {
+            font-size: 80px;
+            margin: 20px 0;
+            color: #3498db;
+        }
+        
+        .weather-description {
+            font-size: 22px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            text-transform: capitalize;
+        }
+        
+        .details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 15px;
+        }
+        
+        .detail-item {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .detail-item i {
+            font-size: 24px;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+        
+        .detail-label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        
+        .detail-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .error-message {
+            padding: 20px;
+            text-align: center;
+            color: #e74c3c;
+            font-weight: 500;
+            display: none;
+        }
+        
+        .loading {
+            padding: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #7f8c8d;
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .temperature {
+                font-size: 60px;
+            }
+            
+            .weather-icon {
+                font-size: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Ob-havo Ilovasi</h1>
+            <p>Har qanday shaharning ob-havo ma'lumotlarini bilib oling</p>
+        </div>
+        
+        <div class="search-box">
+            <input type="text" id="city-input" placeholder="Shahar nomini kiriting...">
+            <button id="search-btn"><i class="fas fa-search"></i></button>
+        </div>
+        
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <p style="margin-top: 10px;">Ma'lumotlar yuklanmoqda...</p>
+        </div>
+        
+        <div class="error-message" id="error-message">
+            Shahar topilmadi. Iltimos, qaytadan urinib ko'ring.
+        </div>
+        
+        <div class="weather-info" id="weather-info">
+            <div class="city-name" id="city-name">Toshkent</div>
+            <div class="date" id="date">Dushanba, 1 Yanvar</div>
+            <div class="weather-icon">
+                <i class="fas fa-sun" id="weather-icon"></i>
+            </div>
+            <div class="temperature" id="temperature">25°C</div>
+            <div class="weather-description" id="weather-description">Ochiq osmon</div>
+            
+            <div class="details">
+                <div class="detail-item">
+                    <i class="fas fa-wind"></i>
+                    <div class="detail-label">Shamol</div>
+                    <div class="detail-value" id="wind-speed">5 km/soat</div>
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-tint"></i>
+                    <div class="detail-label">Namlik</div>
+                    <div class="detail-value" id="humidity">45%</div>
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-compress-alt"></i>
+                    <div class="detail-label">Bosim</div>
+                    <div class="detail-value" id="pressure">1013 hPa</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Loyiha: Ob-havo ilovasi | O'rta darajadagi guruh loyihasi
+        </div>
+    </div>
+
+    <script>
+        // DOM elementlari
+        const cityInput = document.getElementById('city-input');
+        const searchBtn = document.getElementById('search-btn');
+        const cityName = document.getElementById('city-name');
+        const dateElement = document.getElementById('date');
+        const temperature = document.getElementById('temperature');
+        const weatherIcon = document.getElementById('weather-icon');
+        const weatherDescription = document.getElementById('weather-description');
+        const windSpeed = document.getElementById('wind-speed');
+        const humidity = document.getElementById('humidity');
+        const pressure = document.getElementById('pressure');
+        const weatherInfo = document.getElementById('weather-info');
+        const errorMessage = document.getElementById('error-message');
+        const loading = document.querySelector('.loading');
+        
+        // Sana va vaqtni yangilash
+        function updateDateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            dateElement.textContent = now.toLocaleDateString('uz-UZ', options);
+        }
+        
+        // Boshlang'ich ma'lumotlarni o'rnatish
+        updateDateTime();
+        
+        // API kaliti (Haqiqiy loyihada bu server tomondan himoyalangan bo'lishi kerak)
+        // Eslatma: Haqiqiy loyihada API kalitini frontendda saqlamang!
+        const API_KEY = 'demo_key'; // Bu demo kalit, haqiqiy loyihada OpenWeather'dan olingan kalit kerak
+        
+        // Ob-havo ma'lumotlarini olish
+        async function getWeatherData(city) {
+            // Haqiqiy loyihada quyidagi URL ishlatiladi:
+            // const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric&lang=uz`;
+            
+            // Demo maqsadida mock API ishlatamiz
+            const mockData = {
+                name: city,
+                main: {
+                    temp: Math.round(Math.random() * 30 + 5),
+                    humidity: Math.round(Math.random() * 80 + 20),
+                    pressure: Math.round(Math.random() * 100 + 1000)
+                },
+                weather: [
+                    {
+                        main: ['Quyoshli', 'Bulutli', 'Yomg\'irli', 'Qorli'][Math.floor(Math.random() * 4)],
+                        description: ['Ochiq osmon', 'Qisman bulutli', 'Yomg\'ir', 'Qor'][Math.floor(Math.random() * 4)]
+                    }
+                ],
+                wind: {
+                    speed: Math.round(Math.random() * 20 + 1)
+                }
+            };
+            
+            // Simulyatsiya qilingan API chaqiruvi
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve(mockData);
+                }, 1000);
+            });
+        }
+        
+        // Ob-havo ma'lumotlarini ko'rsatish
+        function displayWeatherData(data) {
+            cityName.textContent = data.name;
+            temperature.textContent = `${Math.round(data.main.temp)}°C`;
+            weatherDescription.textContent = data.weather[0].description;
+            windSpeed.textContent = `${data.wind.speed} km/soat`;
+            humidity.textContent = `${data.main.humidity}%`;
+            pressure.textContent = `${data.main.pressure} hPa`;
+            
+            // Ob-havo holatiga qarab ikonkani o'zgartirish
+            const weatherMain = data.weather[0].main.toLowerCase();
+            if (weatherMain.includes('quyoshli') || weatherMain.includes('ochiq')) {
+                weatherIcon.className = 'fas fa-sun';
+            } else if (weatherMain.includes('bulutli')) {
+                weatherIcon.className = 'fas fa-cloud';
+            } else if (weatherMain.includes('yomg\'ir')) {
+                weatherIcon.className = 'fas fa-cloud-rain';
+            } else if (weatherMain.includes('qor')) {
+                weatherIcon.className = 'fas fa-snowflake';
+            } else {
+                weatherIcon.className = 'fas fa-cloud';
+            }
+            
+            weatherInfo.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+        
+        // Xatolikni ko'rsatish
+        function showError() {
+            weatherInfo.style.display = 'none';
+            errorMessage.style.display = 'block';
+        }
+        
+        // Yuklash holatini ko'rsatish
+        function showLoading() {
+            loading.style.display = 'block';
+            weatherInfo.style.display = 'none';
+            errorMessage.style.display = 'none';
+        }
+        
+        // Yuklash holatini yashirish
+        function hideLoading() {
+            loading.style.display = 'none';
+        }
+        
+        // Shahar nomi bilan ob-havo ma'lumotlarini qidirish
+        async function searchWeather() {
+            const city = cityInput.value.trim();
+            
+            if (city === '') {
+                alert('Iltimos, shahar nomini kiriting!');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                const weatherData = await getWeatherData(city);
+                displayWeatherData(weatherData);
+            } catch (error) {
+                console.error('Xatolik:', error);
+                showError();
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Enter tugmasini bosganda qidirish
+        cityInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchWeather();
+            }
+        });
+        
+        // Qidirish tugmasi bosilganda
+        searchBtn.addEventListener('click', searchWeather);
+        
+        // Dastlabki ma'lumotlarni ko'rsatish
+        window.addEventListener('load', () => {
+            getWeatherData('Toshkent').then(data => {
+                displayWeatherData(data);
+            });
+        });
+    </script>
+</body>
+</html>
